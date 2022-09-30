@@ -66,6 +66,9 @@ Metal_space = {\
                'M5_A': 260,'M5_B': 180,\
               }
 
+def make_metal_channel_order ():
+    print("각 metal 별로 channel을 어떤 순서로 구성 할지 만들어 보자.")
+
 ac_dc = ['ac','dc']
 ### Metal Information
 # chip_x = 5600um = 5,600,000 nm
@@ -92,6 +95,7 @@ Option_line_v =[]
 
 Selected_line_h = []
 Selected_line_v = []
+
 
 
 def valid_metal_update_simple ():
