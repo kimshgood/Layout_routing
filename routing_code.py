@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import time
 
 
+# change
+
 ## Router 를 어떻게 해야 하나
 ## 길을 찾는다. array 이 0 은 갈 수 있는 길이요.
 ## Array 0만 찾아서 길을 확보 하고.
@@ -63,6 +65,8 @@ Metal_space = {\
                'M4_A': 150,'M4_B': 150,\
                'M5_A': 260,'M5_B': 180,\
               }
+
+ac_dc = ['ac','dc']
 ### Metal Information
 # chip_x = 5600um = 5,600,000 nm
 # chip_y =  220um =   220,000 nm
