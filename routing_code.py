@@ -66,9 +66,6 @@ Metal_space = {\
                'M5_A': 260,'M5_B': 180,\
               }
 
-
-
-
 ac_dc = ['ac','dc']
 ### Metal Information
 # chip_x = 5600um = 5,600,000 nm
@@ -101,7 +98,15 @@ def make_metal_channel_order ():
     print("M5 부터 시작")
     print("만드는 방식은... metal 방향 확인")
 
-    H_line_order =['M5','M4','M3','M1']
+    #H_line_order =['M5','M4','M3','M1']
+    #Metal_pitch = {\
+    #               'M1_A': 130,'M1_B': 130,\
+    #               'M2_A': 300,'M2_B': 180,\
+    #               'M3_A': 300,'M3_B': 300,\
+    #               'M4_A': 300,'M4_B': 300,\
+    #               'M5_A': 440,'M5_B': 360,\
+
+    # 우리는 각 line 들이 몇개 필요 한지 .. 
 
 
 
