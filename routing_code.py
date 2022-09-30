@@ -101,8 +101,12 @@ def valid_metal_update_simple ():
     off_x = Size_x / 2
     off_y = Size_y / 2
 
+    print("line 구성 방식 설정")
+    m1_order = [Metal_space['M1_A',Metal_space['M1_B']]]
+
     for metal in H_line_order :
         print('Metal=',metal,'Valid Metal is ', "??")
+
         for y in range(int(Size_y / Metal_pitch[metal])):
             #Even Line : Grade = A
             x0 = 0
