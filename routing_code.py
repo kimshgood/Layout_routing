@@ -66,8 +66,8 @@ Metal_space = {\
                'M5_A': 260,'M5_B': 180,\
               }
 
-def make_metal_channel_order ():
-    print("각 metal 별로 channel을 어떤 순서로 구성 할지 만들어 보자.")
+
+
 
 ac_dc = ['ac','dc']
 ### Metal Information
@@ -95,6 +95,13 @@ Option_line_v =[]
 
 Selected_line_h = []
 Selected_line_v = []
+
+def make_metal_channel_order ():
+    print("각 metal 별로 channel을 어떤 순서로 구성 할지 만들어 보자.")
+    print("M5 부터 시작")
+    print("만드는 방식은... metal 방향 확인")
+
+    H_line_order =['M5','M4','M3','M1']
 
 
 
