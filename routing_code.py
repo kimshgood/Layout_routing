@@ -44,115 +44,111 @@ import time
 Metal_layer=5
 #direction   M1  M2   M3  M4  M5
 Metal_dir =   {'M1':'h','M2':'v','M3':'h','M4':'h','M5':'h'}
+ac_dc = ['ac','dc']
+
+Size_x=5600
+Size_y= 220
+
+H_line_order =['M5','M4','M3','M1']
+V_line_order =['M2']
+
+Used_line_h= []
+Used_line_v= []
+Valid_line_h= []
+Valid_line_v= []
+Option_line_h =[]
+Option_line_v =[]
+Selected_line_h = []
+Selected_line_v = []
+
 Metal_pitch = {\
                'M1_A': 130,'M1_B': 130,\
                'M2_A': 300,'M2_B': 180,\
                'M3_A': 300,'M3_B': 300,\
                'M4_A': 300,'M4_B': 300,\
-               'M5_A': 440,'M5_B': 360,\
+               'M5_GIO': 440,'M5_CLK': 440,'M5_B': 360,\
               }
 Metal_width = {\
                'M1_A':  65,'M1_B':  65,\
                'M2_A': 150,'M2_B':  90,\
                'M3_A': 150,'M3_B': 150,\
                'M4_A': 150,'M4_B': 150,\
-               'M5_A': 260,'M5_B': 180,\
+               'M5_GIO': 260,'M5_CLK': 260,'M5_B': 180,\
               }
 Metal_space = {\
                'M1_A':  65,'M1_B':  65,\
                'M2_A': 150,'M2_B':  90,\
                'M3_A': 150,'M3_B': 150,\
                'M4_A': 150,'M4_B': 150,\
-               'M5_A': 260,'M5_B': 180,\
+               'M5_GIO': 260,'M5_CLK': 260,'M5_B': 180,\
+              }
+Metal_count_limit = {\
+               'M1_A': 10000000,'M1_B': 1000000000,\
+               'M2_A': 30000000,'M2_B': 1800000000,\
+               'M3_A': 30000000,'M3_B': 3000000000,\
+               'M4_A': 30000000,'M4_B': 3000000000,\
+               'M5_GIO':    144,'M5_CLK':8,'M5_B': 3000000000,\
               }
 
-ac_dc = ['ac','dc']
-### Metal Information
-# chip_x = 5600um = 5,600,000 nm
-# chip_y =  220um =   220,000 nm
-# Line channel size = chip_size / metal_pitch
-#size_x=int(5000000/metal_pitch['M2'])
-#size_y=int( 220000/metal_pitch['M1'])
-Size_x=5600000
-Size_y= 220000
+# 위치 별로 어떤 Line  들이 깔려야 할지 선정
+Metal_location_order ={\
+    'M1':[[0,Size_y,['M1_A','M1_B']]],
+    'M2':[[0,Size_x,['M2_A','M2_B']]],
+    'M3':[[0,Size_x,['M3_A','M3_B']]],
+    'M4':[[0,Size_x,['M4_A','M4_B']]],
 
-H_line_order =['M5','M4','M3','M1']
-V_line_order =['M2']
-
-# information  
-
-
-Used_line_h= []
-Used_line_v= []
-Valid_line_h= []
-Valid_line_v= []
-
-Option_line_h =[]
-Option_line_v =[]
-
-Selected_line_h = []
-Selected_line_v = []
-
-def make_metal_channel_order ():
-    print("각 metal 별로 channel을 어떤 순서로 구성 할지 만들어 보자.")
-    print("M5 부터 시작")
-    print("만드는 방식은... metal 방향 확인")
-
-    #H_line_order =['M5','M4','M3','M1']
-    #Metal_pitch = {\
-    #               'M1_A': 130,'M1_B': 130,\
-    #               'M2_A': 300,'M2_B': 180,\
-    #               'M3_A': 300,'M3_B': 300,\
-    #               'M4_A': 300,'M4_B': 300,\
-    #               'M5_A': 440,'M5_B': 360,\
-
-    # 우리는 각 line 들이 몇개 필요 한지 .. 
+    'M5':[[  0,20   ,['M5_B']],             \
+          [ 20,100  ,['M5_GIO','M5_B']],    \
+          [100,120  ,['M5_B','M5_CLK']],    \
+          [120,200  ,['M5_GIO','M5_B']]      \
+        ]
+    }
 
 
+def valid_metal_update ():
+    print("channel Rule ")
+    print("1. 첫 시작은 ac line으로 시작 하고 계속 반전 되어야 함. ")
+    print("2. Grade 에 맞혀 Line은 반복 되어야 함. ")
 
-def valid_metal_update_simple ():
+    for layer in H_line_order:
+        remain_size_y = Size_y*1000
+        location = 0 
+        print("해당 metal line의 grade 뭐가 있는지 확인")
 
-    print(Size_x)
-    print(Size_y)
-    off_x = Size_x / 2
-    off_y = Size_y / 2
+        grade =[]
+        metal_inform=[]
+        for pitch in Metal_pitch:
+            if layer in pitch :
+                grade.append(pitch)
 
-    print("line 구성 방식 설정")
-    m1_order = [Metal_space['M1_A',Metal_space['M1_B']]]
+        while remain_size_y > location :
+            print(location , remain_size_y)
+            #현재 위치에 사용 가능 한 Line 확인 
+            order_list = Metal_location_order[layer]
 
-    for metal in H_line_order :
-        print('Metal=',metal,'Valid Metal is ', "??")
+            for order in order_list :
+                if order[0]*1000 <=location and location < order[1]*1000:
 
-        for y in range(int(Size_y / Metal_pitch[metal])):
-            #Even Line : Grade = A
-            x0 = 0
-            x1 = Size_x - 1
+                    grade_list = order[2]
 
-            if y % 2 == 0:
-                grade = 'A'
-                new_line = [metal, grade ,[x0 - off_x,y*Metal_pitch[metal] - off_y ],[x1- off_x,y*Metal_pitch[metal]-off_y]]
-                Valid_line_h.append(new_line)
-            else :
-                grade = 'B'
-                new_line = [metal, grade ,[x0-off_x,y*Metal_pitch[metal]-off_y],[x1-off_x,y*Metal_pitch[metal]-off_y]]
-                Valid_line_h.append(new_line)
+                    while order[0]*1000 <= location and location < order[1]*1000 :
+                        for grade in grade_list :
+                            #metal_inform.ap                
+                            metal_center = int(location + Metal_space[grade] + Metal_width[grade]/2)
 
-    for metal in V_line_order :
-        print('Metal=',metal,'Valid Metal is ', "??")
-        for x in range(int(Size_x / Metal_pitch[metal])):
-            #Even Line : Grade = A
-            y0 = 0
-            y1 = Size_y - 1
+                            new_line = [ layer, grade ,[0, metal_center  ], [Size_x*1000, metal_center]]
 
-            if x % 2 == 0:
-                grade = 'A'
-                new_line = [metal, grade ,[x*Metal_pitch[metal]-off_x,y0-off_y],[x*Metal_pitch[metal]-off_x,y1-off_y]]
-                Valid_line_v.append(new_line)
-            else :
-                grade = 'B'
-                new_line = [metal, grade ,[x*Metal_pitch[metal]-off_x,y0-off_y],[x*Metal_pitch[metal]-off_x,y1-off_y]]
-                Valid_line_v.append(new_line)
+                            Valid_line_h.append(new_line)
 
+                            location = int(location + Metal_space[grade] + Metal_width[grade] + Metal_space[grade])
+
+                            print("Metal Count Limit Check 부분 추가 필요 ")
+
+                            Metal_count_limit[grade] 
+
+
+
+valid_metal_update()
 ### Global Variable Define
 Metal_list =["M1","M2","M3","M4",'M5']
 #direction   M1  M2   M3  M4  M5
@@ -161,7 +157,6 @@ Metal_list =["M1","M2","M3","M4",'M5']
 ## 1-1 : M1 Valid 영역 표시 하기 
 #metal_channel_define( metal_map, layer_pitch, layer_dir,valid_metal,used_metal)
 #metal_channel_define( metal_pitch, metal_dir)
-valid_metal_update_simple()
 
 metal_count = { "M1":0, "M2":0,"M3":0,"M4":0,"M5":0}
 # Valid Channel 확인
