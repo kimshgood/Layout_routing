@@ -99,6 +99,13 @@ Metal_space = {\
                'M4_A_DC': 150,'M4_B_DC': 150,\
                'M5_B_DC': 180,\
               }
+Metal_cont_pitch = {\
+               'M1': 130,\
+               'M2': 300,\
+               'M3': 300,\
+               'M4': 300,\
+               'M5': 360\
+                }
 
 Metal_count = {\
                'M1_A_AC'   : 0,'M1_B_AC'  : 0,\
@@ -276,12 +283,12 @@ def routing_option_h ( net ):
             if net[1] == valid[0] and net[2] == valid[1] :
                 #1차 후보: 수직 Point 들어 오는 
                 if max(net[3][1],net[4][1]) >= max(valid[2][1],valid[3][1]) and min(net[3][1],net[4][1]) <=min(valid[2][1],valid[3][1]) :
-                    print("This Line is option_h 1'st ",valid)
+                    #print("This Line is option_h 1'st ",valid)
                     new_line = ["Opt1" , valid[0],valid[1],valid[2],valid[3]]
                     option_h_list.append(new_line)
                 #2차 후보: 수직 Point를 벗어 나는 경우 
                 else :
-                    print("This Line is option_h 2nd ",valid)
+                    #print("This Line is option_h 2nd ",valid)
                     new_line = ["Opt2" , valid[0],valid[1],valid[2],valid[3]]
                     option_h_list.append(new_line)
     return option_h_list
@@ -295,38 +302,59 @@ def routing_option_v ( line_h, net ):
     new_distance = 0 
     new_line = []
 
+    # vertical line 거리가 가까운 순으로 진행 하자!!
+    # 단, 거리가 일정 수준 이상 멀어지면 해당 Line 은 vertical line이 없음. 
+    index_vertical =[]
+
+    for i in range(len(Valid_line_v)-1) :
+        distance = abs(Valid_line_v[i][2][0] - net[2][0])
+
+        index_vertical.append((i,distance))
+
+    index_vertical.sort(key= lambda x:x[1])
+    for i in index_vertical :
+        distance = i[1]
+        valid_v = Valid_line_v[i[0]]
+
+        for j in range(5) :
+            if int(i[1]) < int(Metal_pitch[valid_v[1]])*(j+1) :
+                line_v = ["Opt"+str(j), valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
+                option_cont = routing_option_cont_check(line_h,line_v)
+
+                if option_cont ==1:
+                    return line_v
+            
+
+
+
+
+
     for valid_v in Valid_line_v :
         #if (net[2][1] >= valid_v[2][1]) and (net[3][1] <= (valid_v[3][1])) and (net[0] in valid_v) :
-        if (max(net[2][1],net[3][1]) <= max((valid_v[2][1],valid_v[3][1]))) and ((min(net[2][1],net[3][1])>=min(valid_v[2][1],valid_v[3][1]))):
+        if (max(net[2][1],net[3][1]) <= max((valid_v[2][1],valid_v[3][1]))) and \
+            ((min(net[2][1],net[3][1])>=min(valid_v[2][1],valid_v[3][1]))):
             new_distance = abs(net[2][0] - valid_v[2][0])
             #1차 후보: 해당 X 좌표에 수직 Line 있는지 확인. 
             if ( new_distance ) == Metal_pitch[valid_v[1]] :
-                print("matching 되는 것이 있으면 기존의 option_v 는 모두 제거 한다. ")
-                print('contact  확인 필요.')
+                #print("matching 되는 것이 있으면 기존의 option_v 는 모두 제거 한다. ")
+                #print('contact  확인 필요.')
                 line_v = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
                 option_cont = routing_option_cont_check(line_h,line_v)
-                print("This Line is option_v 1'st ",valid_v)
+                #print("This Line is option_v 1'st ",valid_v)
 
-                if option_cont > 0 :
+                if option_cont == 1 :
                     option_v.clear()
                     new_line = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
                     return option_v
-            else :
-                if old_distance > new_distance:
-                    old_distance = new_distance 
-                    if old_distance < Metal_pitch[valid_v[1]]*2:
-                        print("matching 되는 것이 있으면 기존의 option_v 는 모두 제거 한다. ")
-                        print('contact  확인 필요.')
-                        line_v = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
-                        option_cont = routing_option_cont_check(line_h,line_v)
-                        if option_cont > 0 :
-                            new_line = ["Opt2" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
-                    else:
-                        new_line=[]
-                else :
-                    pass
+            elif new_distance < Metal_pitch[valid_v[1]]*2:
+                    line_v = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
+                    option_cont = routing_option_cont_check(line_h,line_v)
+                    if option_cont == 1 :
+                        new_line = ["Opt2" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
+            else:
+                new_line=[]
     
-    print("option_v 의 v_line 들과 line_h 사이에 들어 있는 Contact 이 있어야 하는 경우 검색 필요")
+    #print("option_v 의 v_line 들과 line_h 사이에 들어 있는 Contact 이 있어야 하는 경우 검색 필요")
 
     if new_line != []:
         option_v.append(new_line)
@@ -348,48 +376,52 @@ def routing_option_cont_check ( line_h, line_v ):
 
 
     if hi_layer - low_layer > 1:
-        print("두개 Layer 사이에는 Contact 이 있어야 합니다. ",hi_layer,low_layer)
+        #print("두개 Layer 사이에는 Contact 이 있어야 합니다. ",hi_layer,low_layer)
         for i in range( hi_layer - low_layer -1 ):
             cont_layer_list.append("M"+str(i+low_layer+1))
-        print("수평  Line  찾아 보자.")
-        print("우선 used_line 에서 해당 수평 line을 사용 했는지 부터. ")
+        #print("수평  Line  찾아 보자.")
+        #print("우선 used_line 에서 해당 수평 line을 사용 했는지 부터. ")
 
         option_c =[]
-        print("Cont. 의 X, Y 좌표 기준 해당 Layer의 Metal Width + Space  거리 내에 있는 Line 이 있는지 확인 ")
-        print("horizontal line이 있는 경우 위/아래 영역에 해당 metal layer의 ( Width + Space * 2 ) 를 제거 한다. ")
+        #print("Cont. 의 X, Y 좌표 기준 해당 Layer의 Metal Width + Space  거리 내에 있는 Line 이 있는지 확인 ")
+        #print("horizontal line이 있는 경우 위/아래 영역에 해당 metal layer의 ( Width + Space * 2 ) 를 제거 한다. ")
         for cont_layer in cont_layer_list:
             # 1차 관문 
             # 사용 된 Line 중 해당 Contact 에 포함 된 Line이 있는가? 
             for used_h in Used_line_h :
                 if cont_layer in used_h :
-                    print("수평 Line 이기 때문에 해당 y 좌표 위 아래 에 해당 Layer Space 를 더하거나 뺀 값에")
-                    print("수평 Line을 사용 하고 있는지 확인 해야 함")
-                    if (used_h[3][1] <= cont_y + Metal_pitch[cont_layer]) and \
-                       (used_h[3][1] >= cont_y - Metal_pitch[cont_layer]) :
-                        print("이 Line은 Contact 의 Y 좌표 기준 +- Pitch 내에 사용 한  Line 이 있음.")
+                    #print("수평 Line 이기 때문에 해당 y 좌표 위 아래 에 해당 Layer Space 를 더하거나 뺀 값에")
+                    #print("수평 Line을 사용 하고 있는지 확인 해야 함")
+                    metal_pitch = Metal_pitch
 
-                        print(" 그럼 이 Line 의 X 좌표도 포함 되는 지 확인 해야 함.")
-                        if (min(used_h[3][0],used_h[4][0]) <= cont_x+Metal_pitch[cont_layer]) and \
-                           (max(used_h[3][0],used_h[4][0]) >= cont_x-Metal_pitch[cont_layer]) :
-                            print("x , y 모두 포함 되어 있기 때문에 이 Contact 은 사용 불가!!")
+                    if (used_h[3][1] <= cont_y + Metal_cont_pitch[cont_layer]) and \
+                       (used_h[3][1] >= cont_y - Metal_cont_pitch[cont_layer]) :
+                        #print("이 Line은 Contact 의 Y 좌표 기준 +- Pitch 내에 사용 한  Line 이 있음.")
+
+                        #print(" 그럼 이 Line 의 X 좌표도 포함 되는 지 확인 해야 함.")
+                        if (min(used_h[3][0],used_h[4][0]) <= cont_x+Metal_cont_pitch[cont_layer]) and \
+                           (max(used_h[3][0],used_h[4][0]) >= cont_x-Metal_cont_pitch[cont_layer]) :
+                            #print("x , y 모두 포함 되어 있기 때문에 이 Contact 은 사용 불가!!")
                             return -1
             # 2차 관문 
             #사용 된 Line 중 해당 Contact 에 포함 된 Line이 있는가? 
             for used_v in Used_line_v :
                 if cont_layer in used_v :
-                    print("수직 Line 이기 때문에 해당 x 좌표 좌/우에 해당 Layer Space 를 더하거나 뺀 값에")
-                    print("수직 Line을 사용 하고 있는지 확인 해야 함")
-                    if used_v[3][0] <= cont_x + Metal_pitch[cont_layer] and used_v[3][0] > cont_x - Metal_pitch[cont_layer] :
-                        print("이 Line은 Contact 의 Y 좌표 기준 +- Pitch 내에 사용 한  Line 이 있음.")
+                    #print("수직 Line 이기 때문에 해당 x 좌표 좌/우에 해당 Layer Space 를 더하거나 뺀 값에")
+                    #print("수직 Line을 사용 하고 있는지 확인 해야 함")
+                    if used_v[3][0] <= cont_x + Metal_cont_pitch[cont_layer] and used_v[3][0] > cont_x - Metal_cont_pitch[cont_layer] :
+                        #print("이 Line은 Contact 의 Y 좌표 기준 +- Pitch 내에 사용 한  Line 이 있음.")
 
-                        print(" 그럼 이 Line 의 y 좌표도 포함 되는 지 확인 해야 함.")
-                        if (min(used_v[3][1],used_v[4][1]) <= cont_y+Metal_pitch[cont_layer]) and \
-                           (max(used_v[3][1],used_v[4][1]) >= cont_y-Metal_pitch[cont_layer]) :
-                            print("x , y 모두 포함 되어 있기 때문에 이 Contact 은 사용 불가!!")
+                        #print(" 그럼 이 Line 의 y 좌표도 포함 되는 지 확인 해야 함.")
+                        if (min(used_v[3][1],used_v[4][1]) <= cont_y+Metal_cont_pitch[cont_layer]) and \
+                           (max(used_v[3][1],used_v[4][1]) >= cont_y-Metal_cont_pitch[cont_layer]) :
+                            #print("x , y 모두 포함 되어 있기 때문에 이 Contact 은 사용 불가!!")
                             return -1
 
         #1/2차 관문을 통과 (Used_line 중에 사용 된 것이 없음.)
-    else :
+        else :
+            return 1
+    else:
         return 1
 
 def routing_select_multi(net):
@@ -433,6 +465,10 @@ def routing_select_multi(net):
             if min_y > net[i][1] :
                 min_y = net[i][1]
 
+
+
+
+
     print(max_x,min_x,max_y,min_y)
 
     print("Line 중 가장 긴 h 라인을 찾는다. ")
@@ -452,7 +488,6 @@ def routing_select_multi(net):
 
     print(" 현재 option_h 라인들 중에 vertical line 의 합이 가장 짧은 녀석을 선택을 찾자!")
     old_line_length = 0 
-    new_line_length = 0 
     print("old line 과 new_line을 비교 해서 가장 짧은 line_h , line_v 를 저장 하고   ")
     print(" 해당 line 들을 selected_line 에 저장 한다. ")
 
@@ -461,12 +496,19 @@ def routing_select_multi(net):
     print("find opt1 ")
     opt1_index = []
     for i in range(len(option_h_list)):
-        if option_h_list[i][0] == "Opt1":
-            opt1_index.append(i)
+        #if option_h_list[i][0] == "Opt1":
+        total_length = 0
+        for y_pos in net_y :
+            total_length = total_length + abs( option_h_list[i][3][1] - y_pos)
+        line = ( i , total_length)
+        opt1_index.append(line)
+    opt1_index.sort(key=lambda x:x[1])
 
     for i in opt1_index:
         ## opt1 만 찾아 봅시다. 
-        option_h = option_h_list[i]
+        print(i[0])
+        print(i[1])
+        option_h = option_h_list[i[0]]
         #print(h_split)
         line_y=int(option_h[3][1])
         pass_flag = 0
@@ -475,28 +517,29 @@ def routing_select_multi(net):
         option_v_list=[]
         line_v_list=[]
 
-        print("vertical line 이 있는지 확인.")
+        #print("vertical line 이 있는지 확인.")
         for i in range(len(net_x)):
             for metal in Metal_dir :
                 if Metal_dir[metal] == 'v':
                     v_line = [ metal,grade,[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
                     option_v = routing_option_v(option_h,v_line)
 
-            if option_v !=[]:
-                pass_flag = 1
-                # option_v type  =[[],[]]
-                for option in option_v:
-                    option_v_list.append(option)
-                    new_line = [net[0],option[1],option[2],[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
-                    line_v_list.append(new_line)
-            else:
-                pass_flag = 0 
-                option_v_list.clear()
-                line_v_list.clear()
+                    if option_v !=[]:
+                        pass_flag = 1
+                        # option_v type  =[[],[]]
+                        #for option in option_v:
+                        option_v_list.append(option_v)
+                        new_line = [net[0],option_v[1],option_v[2],[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
+                        line_v_list.append(new_line)
+                    else:
+                        pass_flag = 0 
+                        option_v_list.clear()
+                        line_v_list.clear()
 
         #print("기존에 option_metal 과 비교를 하고 새로운 대안이 될지 확인 하자.")
         #print("vertical line 길이 총합이 짧은 녀석이 좋은 놈이다. ")
         if pass_flag ==1 :
+            new_line_length = 0 
             for line in line_v_list:
                 new_line_length = new_line_length + abs(line[3][1] - line[4][1])
 
@@ -518,80 +561,6 @@ def routing_select_multi(net):
                 for i in range(len(line_v_list)):
                     Selected_line_v.append(line_v_list[i])
             return 1
-
-    print("Opt1 이 없는 경우 opt_2 찾아서 동일 하게 수행 ")
-    opt2_index = []
-    for i in range(len(option_h_list)):
-        if option_h_list[i][0] == "Opt2":
-            opt2_index.append(i)
-
-    for i in opt2_index:
-        option_h = option_h_list[i]
-        #print(h_split)
-        line_y=int(option_h[3][1])
-        pass_flag = 0
-        # 선택 된 h_line 에 포함 된 option_v_list 확인. 
-        # v_line 은 line_v_list 에 저장, option_v_list 
-        option_v_list=[]
-        line_v_list=[]
-
-        for i in range(len(net_x)):
-
-
-            v_line = [ 'M2',grade,[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
-            option_v = routing_option_v(option_h,v_line)
-
-            if option_v !=[]:
-                pass_flag = 1
-                # option_v type  =[[],[]]
-                for option in option_v:
-                    option_v_list.append(option)
-                    new_line = [net[0],option[1],option[2],[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
-                    line_v_list.append(new_line)
-            else:
-                pass_flag = 0 
-                option_v_list.clear()
-                line_v_list.clear()
-        
-        #print("기존에 option_metal 과 비교를 하고 새로운 대안이 될지 확인 하자.")E
-        #print("vertical line 길이 총합이 짧은 녀석이 좋은 놈이다. ")
-        if pass_flag ==1 :
-            for line in line_v_list:
-                new_line_length = new_line_length + abs(line[3][1] - line[4][1])
-
-            if old_line_length == 0:
-                old_line_length = new_line_length
-                Option_line_h.clear()
-                Option_line_v.clear()
-                Selected_line_h.clear()
-                Selected_line_v.clear()
-
-                Option_line_h.append(option_h)
-                for i in range(len(option_v_list)):
-                    Option_line_v.append(option_v_list[i])
-
-                Selected_line_h.append(long_h)
-                for i in range(len(line_v_list)):
-                    Selected_line_v.append(line_v_list[i])
-            elif old_line_length <= new_line_length :
-                pass
-            elif old_line_length > new_line_length :
-                Option_line_h.clear()
-                Option_line_v.clear()
-                Selected_line_h.clear()
-                Selected_line_v.clear()
-                Option_line_h.append(option_h)
-
-                for i in range(len(option_v_list)):
-                    Option_line_v.append(option_v_list[i])
-
-                Selected_line_h.append(long_h)
-                for i in range(len(line_v_list)):
-                    Selected_line_v.append(line_v_list[i])
-
-        elif pass_flag == 0 :
-            #print("이 h_line 은 vertical line이 없오.")
-            pass
 
 
 def routing_line(net):
@@ -622,16 +591,16 @@ def routing_line(net):
 
                     print(" 수평 Line 이기 때문에 잘려진 왼쪽, 잘려진 오른쪽 라인이 valid_line에 저장 된다.")
                     print(" Chop left의 우측은 routing 되기  때문에 -1 필요")
-                    chop_left =  [valid_x1 , routing_x1-Metal_space[opt_split[1]]]
+                    chop_left =  [valid_x1 , routing_x1-Metal_space[opt_split[2]]]
                     print(" Chop right의 좌측은  routing space  필요")
-                    chop_right = [routing_x2+Metal_space[opt_split[1]], valid_x2]
+                    chop_right = [routing_x2+Metal_space[opt_split[2]], valid_x2]
 
                     print(" 수평 line의 길이가 Line 최소 길이 보다 짧은 경우 valid_line에 저장 안함 ")
-                    if (chop_left[1] - chop_left[0] ) >= Metal_width[opt_split[1]] :
+                    if (chop_left[1] - chop_left[0] ) >= Metal_width[opt_split[2]] :
                         valid = [opt_split[1],opt_split[2],[chop_left[0],opt_split[3][1]],[chop_left[1],opt_split[4][1]]]
                         Valid_line_h.append(valid)
 
-                    if (chop_right[1] - chop_right[0] ) >= Metal_width[opt_split[1]] :
+                    if (chop_right[1] - chop_right[0] ) >= Metal_width[opt_split[2]] :
                         valid = [opt_split[1],opt_split[2],[chop_right[0],opt_split[3][1]],[chop_right[1],opt_split[4][1]]]
                         Valid_line_h.append(valid)
 
@@ -662,17 +631,17 @@ def routing_line(net):
 
                     print(" 수직 Line 이기 때문에 잘려진 위쪽, 잘려진 아래 라인이 valid_line에 저장 된다.")
                     print(" Chop dn의 위는  routing 되기  때문에 -1 필요")
-                    chop_down =  [valid_y1 , routing_y1-Metal_space[opt_split[1]]]
+                    chop_down =  [valid_y1 , routing_y1-Metal_space[opt_split[2]]]
                     print(" Chop up의 아래는   routing space  필요")
-                    chop_up =    [routing_y2+Metal_space[opt_split[1]], valid_y2]
+                    chop_up =    [routing_y2+Metal_space[opt_split[2]], valid_y2]
 
                     print(" 수평 line의 길이가 Line 최소 길이 보다 짧은 경우 valid_line에 저장 안함 ")
-                    if (chop_down[1] - chop_down[0] ) >= Metal_width[opt_split[1]] :
+                    if (chop_down[1] - chop_down[0] ) >= Metal_width[opt_split[2]] :
                         valid = [opt_split[1],opt_split[2],[opt_split[3][0],chop_down[0]],[opt_split[4][0],chop_down[1]]]
                         Valid_line_v.append(valid)
                     print(Valid_line_v[len(Valid_line_v)-1])
 
-                    if (chop_up[1] - chop_up[0] ) >= Metal_width[opt_split[1]] :
+                    if (chop_up[1] - chop_up[0] ) >= Metal_width[opt_split[2]] :
                         valid = [opt_split[1],opt_split[2],[opt_split[3][0],chop_up[0]],[opt_split[4][0],chop_up[1]]]
                         Valid_line_v.append(valid)
                     print(Valid_line_v[len(Valid_line_v)-1])
@@ -693,17 +662,23 @@ def routing_line(net):
 
 
 net2=['net_1002','M3','M3_A_AC',[400,300],[1000,700],[10000,400]]
-net3=['net_1003','M3','M4_A_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
-net4=['net_1004','M5','M5_GIO_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
+net2_clone=['net_1002_copy','M3','M3_A_AC',[400,300],[1000,700],[10000,400]]
+#net3=['net_1003','M4','M4_A_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
+#net4=['net_1004','M5','M5_B_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
+#net5=['net_1005','M5','M5_GIO_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
 #net4=['net_1004','M5','A',[-11000,3000],[1000,7000],[10000,4000],[100,20000],[2000,100000]]
 
 start = time.time()
 routing_select_multi(net2)
 routing_line(net2)
-routing_select_multi(net3)
-routing_line(net3)
-routing_select_multi(net4)
-routing_line(net4)
+routing_select_multi(net2_clone)
+routing_line(net2_clone)
+#routing_select_multi(net3)
+#routing_line(net3)
+#routing_select_multi(net4)
+#routing_line(net4)
+#routing_select_multi(net5)
+#routing_line(net5)
 print("time:",time.time() - start)
 
 ## 최종 결과 
