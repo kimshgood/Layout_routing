@@ -5,7 +5,7 @@ import math
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import cv2
 import time
 
 
@@ -315,50 +315,26 @@ def routing_option_v ( line_h, net ):
     for i in index_vertical :
         distance = i[1]
         valid_v = Valid_line_v[i[0]]
+        option_v = []
 
-        for j in range(5) :
-            if int(i[1]) < int(Metal_pitch[valid_v[1]])*(j+1) :
-                line_v = ["Opt"+str(j), valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
-                option_cont = routing_option_cont_check(line_h,line_v)
+        while int(i[1]) < int(Metal_pitch[valid_v[1]])*2 :
+            opt = ""
+            if int(i[1]) < (Metal_pitch[valid_v[1]]*1):
+                opt = "Opt1"
+            elif int(i[1]) < (Metal_pitch[valid_v[1]]*2):
+                opt = "Opt2"
+            else :
+                1
 
-                if option_cont ==1:
-                    return line_v
-            
-
-
-
-
-
-    for valid_v in Valid_line_v :
-        #if (net[2][1] >= valid_v[2][1]) and (net[3][1] <= (valid_v[3][1])) and (net[0] in valid_v) :
-        if (max(net[2][1],net[3][1]) <= max((valid_v[2][1],valid_v[3][1]))) and \
-            ((min(net[2][1],net[3][1])>=min(valid_v[2][1],valid_v[3][1]))):
-            new_distance = abs(net[2][0] - valid_v[2][0])
-            #1차 후보: 해당 X 좌표에 수직 Line 있는지 확인. 
-            if ( new_distance ) == Metal_pitch[valid_v[1]] :
-                #print("matching 되는 것이 있으면 기존의 option_v 는 모두 제거 한다. ")
-                #print('contact  확인 필요.')
-                line_v = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
-                option_cont = routing_option_cont_check(line_h,line_v)
-                #print("This Line is option_v 1'st ",valid_v)
-
-                if option_cont == 1 :
-                    option_v.clear()
-                    new_line = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
-                    return option_v
-            elif new_distance < Metal_pitch[valid_v[1]]*2:
-                    line_v = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
-                    option_cont = routing_option_cont_check(line_h,line_v)
-                    if option_cont == 1 :
-                        new_line = ["Opt2" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
-            else:
-                new_line=[]
-    
-    #print("option_v 의 v_line 들과 line_h 사이에 들어 있는 Contact 이 있어야 하는 경우 검색 필요")
-
-    if new_line != []:
-        option_v.append(new_line)
-    return option_v
+            option_v = [opt, valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
+            option_cont = routing_option_cont_check(line_h,option_v)
+            if option_cont ==1:
+                return option_v
+            else :
+                option_v=[]
+                return option_v
+        else :
+            return option_v
 
 # contact 연결이 되는지 확인 하고 해당 layer 를 return 한다. 
 def routing_option_cont_check ( line_h, line_v ):
@@ -663,32 +639,81 @@ def routing_line(net):
 
 net2=['net_1002','M3','M3_A_AC',[400,300],[1000,700],[10000,400]]
 net2_clone=['net_1002_copy','M3','M3_A_AC',[400,300],[1000,700],[10000,400]]
-#net3=['net_1003','M4','M4_A_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
-#net4=['net_1004','M5','M5_B_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
-#net5=['net_1005','M5','M5_GIO_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
-#net4=['net_1004','M5','A',[-11000,3000],[1000,7000],[10000,4000],[100,20000],[2000,100000]]
+net3=['net_1003','M4','M4_A_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
+net4=['net_1004','M5','M5_B_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
+net5=['net_1005','M5','M5_GIO_AC',[110000,300],[1000,700],[10000,400],[100,20000]]
+net6=['net_1006','M5','M5_GIO_AC',[210000,300],[1000,700],[10000,400],[100,20000]]
+net7=['net_1006','M5','M5_GIO_AC',[210000,300],[400000,700],[10000,400],[100,20000]]
 
 start = time.time()
 routing_select_multi(net2)
 routing_line(net2)
 routing_select_multi(net2_clone)
 routing_line(net2_clone)
-#routing_select_multi(net3)
-#routing_line(net3)
-#routing_select_multi(net4)
-#routing_line(net4)
-#routing_select_multi(net5)
-#routing_line(net5)
+routing_select_multi(net3)
+routing_line(net3)
+routing_select_multi(net4)
+routing_line(net4)
+routing_select_multi(net5)
+routing_line(net5)
+routing_select_multi(net6)
+routing_line(net6)
+routing_select_multi(net7)
+routing_line(net7)
+
 print("time:",time.time() - start)
 
-## 최종 결과 
 
-for line in Used_line_v:
-    print(line)
-for line in Used_line_h:
-    print(line)
+## 최종 결과 
+def draw_line(used_line_list) :
+    max_x = 0
+    max_y = 0
+    min_x = 0
+    min_y = 0
+
+    for line in used_line_list :
+        x1 = int(line[3][0]/1000)
+        x2 = int(line[4][0]/1000)
+        y1 = int(line[3][1]/1000)
+        y2 = int(line[4][1]/1000)
+        max_x = max(max_x,x1,x2)
+        min_x = min(min_x,x1,x2)
+        max_y = max(max_y,y1,y2)
+        min_y = min(min_y,y1,y2)
+
+
+    R,G,B = ( 0 , 0 , 255) , ( 0,255,0), (255,0,0)
+    #RG    = ( 0 , 255 , 255) , ( 0,255,0)
+    img = np.zeros((max_y -min_y,max_x-min_x,3),np.uint8)
+    img[:] = ( 255,255,255)
+
+    for line in used_line_list:
+        x1 = int(line[3][0]/1000)
+        x2 = int(line[4][0]/1000)
+        y1 = int(line[3][1]/1000)
+        y2 = int(line[4][1]/1000)
+        if 'M2' in line :
+            cv2.line(img,(x1,y1),(x2,y2),R+G,1)
+
+        elif 'M1' in line :
+            cv2.line(img,(x1,y1),(x2,y2),R+G+B,1)
+        elif 'M3' in line :
+            cv2.line(img,(x1,y1),(x2,y2),R,2)
+        elif 'M4' in line :
+            cv2.line(img,(x1,y1),(x2,y2),G,2)
+        elif 'M5' in line :
+            cv2.line(img,(x1,y1),(x2,y2),B,2)
+
+    cv2.imshow('Line',img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+draw_line(Used_line_h)
 
 print(len(Valid_line_v))
+
+
+
 
 
 
