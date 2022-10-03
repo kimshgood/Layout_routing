@@ -44,8 +44,9 @@ import time
 Metal_layer=5
 #direction   M1  M2   M3  M4  M5
 Metal_dir =   {'M1':'h','M2':'v','M3':'h','M4':'h','M5':'h'}
-ac_dc = ['ac','dc']
+ac_dc = ['AC','DC']
 
+# unit [um]
 Size_x=5600
 Size_y= 220
 
@@ -62,48 +63,85 @@ Selected_line_h = []
 Selected_line_v = []
 
 Metal_pitch = {\
-               'M1_A': 130,'M1_B': 130,\
-               'M2_A': 300,'M2_B': 180,\
-               'M3_A': 300,'M3_B': 300,\
-               'M4_A': 300,'M4_B': 300,\
-               'M5_GIO': 440,'M5_CLK': 440,'M5_B': 360,\
+               'M1_A_AC': 130,'M1_B_AC': 130,\
+               'M2_A_AC': 300,'M2_B_AC': 180,\
+               'M3_A_AC': 300,'M3_B_AC': 300,\
+               'M4_A_AC': 300,'M4_B_AC': 300,\
+               'M5_GIO_AC': 440,'M5_CLK_AC': 440,'M5_B_AC': 360,\
+               'M1_A_DC': 130,'M1_B_DC': 130,\
+               'M2_A_DC': 300,'M2_B_DC': 180,\
+               'M3_A_DC': 300,'M3_B_DC': 300,\
+               'M4_A_DC': 300,'M4_B_DC': 300,\
+               'M5_B_DC': 360,\
               }
 Metal_width = {\
-               'M1_A':  65,'M1_B':  65,\
-               'M2_A': 150,'M2_B':  90,\
-               'M3_A': 150,'M3_B': 150,\
-               'M4_A': 150,'M4_B': 150,\
-               'M5_GIO': 260,'M5_CLK': 260,'M5_B': 180,\
+               'M1_A_AC':  65,'M1_B_AC':  65,\
+               'M2_A_AC': 150,'M2_B_AC':  90,\
+               'M3_A_AC': 150,'M3_B_AC': 150,\
+               'M4_A_AC': 150,'M4_B_AC': 150,\
+               'M5_GIO_AC': 260,'M5_CLK_AC': 260,'M5_B_AC': 180,\
+               'M1_A_DC':  65,'M1_B_DC':  65,\
+               'M2_A_DC': 150,'M2_B_DC':  90,\
+               'M3_A_DC': 150,'M3_B_DC': 150,\
+               'M4_A_DC': 150,'M4_B_DC': 150,\
+               'M5_B_DC': 180,\
               }
+
 Metal_space = {\
-               'M1_A':  65,'M1_B':  65,\
-               'M2_A': 150,'M2_B':  90,\
-               'M3_A': 150,'M3_B': 150,\
-               'M4_A': 150,'M4_B': 150,\
-               'M5_GIO': 260,'M5_CLK': 260,'M5_B': 180,\
+               'M1_A_AC':  65,'M1_B_AC':  65,\
+               'M2_A_AC': 150,'M2_B_AC':  90,\
+               'M3_A_AC': 150,'M3_B_AC': 150,\
+               'M4_A_AC': 150,'M4_B_AC': 150,\
+               'M5_GIO_AC': 180,'M5_CLK_AC': 180,'M5_B_AC': 180,\
+               'M1_A_DC':  65,'M1_B_DC':  65,\
+               'M2_A_DC': 150,'M2_B_DC':  90,\
+               'M3_A_DC': 150,'M3_B_DC': 150,\
+               'M4_A_DC': 150,'M4_B_DC': 150,\
+               'M5_B_DC': 180,\
               }
+
+Metal_count = {\
+               'M1_A_AC'   : 0,'M1_B_AC'  : 0,\
+               'M2_A_AC'   : 0,'M2_B_AC'  : 0,\
+               'M3_A_AC'   : 0,'M3_B_AC'  : 0,\
+               'M4_A_AC'   : 0,'M4_B_AC'  : 0,\
+               'M5_GIO_AC' : 0,'M5_CLK_AC':0,'M5_B_AC': 0,
+               'M1_A_DC'   : 0,'M1_B_DC'  : 0,\
+               'M2_A_DC'   : 0,'M2_B_DC'  : 0,\
+               'M3_A_DC'   : 0,'M3_B_DC'  : 0,\
+               'M4_A_DC'   : 0,'M4_B_DC'  : 0,\
+               'M5_B_DC': 0
+                }
+
 Metal_count_limit = {\
-               'M1_A': 10000000,'M1_B': 1000000000,\
-               'M2_A': 30000000,'M2_B': 1800000000,\
-               'M3_A': 30000000,'M3_B': 3000000000,\
-               'M4_A': 30000000,'M4_B': 3000000000,\
-               'M5_GIO':    144,'M5_CLK':8,'M5_B': 3000000000,\
+               'M1_A_AC': 10000000,'M1_B_AC': 1000000000,\
+               'M2_A_AC': 30000000,'M2_B_AC': 1800000000,\
+               'M3_A_AC': 30000000,'M3_B_AC': 3000000000,\
+               'M4_A_AC': 30000000,'M4_B_AC': 3000000000,\
+               'M5_GIO_AC':    144,'M5_CLK_AC':8,'M5_B_AC': 3000000000,\
+               'M1_A_DC': 10000000,'M1_B_DC': 1000000000,\
+               'M2_A_DC': 30000000,'M2_B_DC': 1800000000,\
+               'M3_A_DC': 30000000,'M3_B_DC': 3000000000,\
+               'M4_A_DC': 30000000,'M4_B_DC': 3000000000,\
+               'M5_B_DC': 3000000000\
               }
 
-# 위치 별로 어떤 Line  들이 깔려야 할지 선정
-Metal_location_order ={\
-    'M1':[[0,Size_y,['M1_A','M1_B']]],
-    'M2':[[0,Size_x,['M2_A','M2_B']]],
-    'M3':[[0,Size_x,['M3_A','M3_B']]],
-    'M4':[[0,Size_x,['M4_A','M4_B']]],
+# PERI  영역 별로 어떤 Line 어떤 순서로 배치 될지 정의 한다. 
+Metal_grade_order ={\
+    'M1':[[0,Size_y,['M1_A_AC','M1_B_DC']]],
 
-    'M5':[[  0,20   ,['M5_B']],             \
-          [ 20,100  ,['M5_GIO','M5_B']],    \
-          [100,120  ,['M5_B','M5_CLK']],    \
-          [120,200  ,['M5_GIO','M5_B']]      \
+    'M2':[[0,Size_x,['M2_A_AC','M2_B_DC']]],
+
+    'M3':[[0,Size_y,['M3_A_AC','M3_B_DC']]],
+    'M4':[[0,Size_y,['M4_A_AC','M4_B_DC']]],
+
+    'M5':[[  0,20   ,['M5_B_AC','M5_B_DC']],             \
+          [ 20,100  ,['M5_GIO_AC','M5_B_DC']],    \
+          [100,120  ,['M5_B_DC','M5_CLK_AC']],    \
+          [120,200  ,['M5_GIO_AC','M5_B_DC']],    \
+          [200,220  ,['M5_B_AC','M5_B_DC']]      
         ]
     }
-
 
 def valid_metal_update ():
     print("channel Rule ")
@@ -122,30 +160,72 @@ def valid_metal_update ():
                 grade.append(pitch)
 
         while remain_size_y > location :
-            print(location , remain_size_y)
+            #print(location , remain_size_y)
             #현재 위치에 사용 가능 한 Line 확인 
-            order_list = Metal_location_order[layer]
-
+            order_list = Metal_grade_order[layer]
+            #order_list = [ start , end , [ metal_1st , metal_2nd ]]
             for order in order_list :
-                if order[0]*1000 <=location and location < order[1]*1000:
-
                     grade_list = order[2]
 
                     while order[0]*1000 <= location and location < order[1]*1000 :
                         for grade in grade_list :
-                            #metal_inform.ap                
-                            metal_center = int(location + Metal_space[grade] + Metal_width[grade]/2)
+                            #metal_inform.ap               
+                            pre_grade = grade
 
-                            new_line = [ layer, grade ,[0, metal_center  ], [Size_x*1000, metal_center]]
+                            try :
+                                pre_grade = Valid_line_h[len(Valid_line_h)-1][1]
+                            except:
+                                print('첫번째 Valid_line_h')
 
-                            Valid_line_h.append(new_line)
+                            max_space = max( Metal_space[grade] , Metal_space[pre_grade])
+                            metal_center = int(location + max_space + Metal_width[grade]/2)
+                            location = int(location + max_space + Metal_width[grade])
 
-                            location = int(location + Metal_space[grade] + Metal_width[grade] + Metal_space[grade])
+                            #print("Metal Count Limit Check 부분 추가 필요 ")
+                            new_line = [ layer, grade,[0, metal_center  ], [Size_x*1000, metal_center]]
+                            if Metal_count[grade] < Metal_count_limit[grade]:
+                                Valid_line_h.append(new_line)
+                                Metal_count[grade] = Metal_count[grade] + 1
+                                #print("pintch=",Valid_line_h[len(Valid_line_h)-1][1],Valid_line_h[len(Valid_line_h)-1][2][1] - Valid_line_h[len(Valid_line_h)-2][2][1])
 
-                            print("Metal Count Limit Check 부분 추가 필요 ")
+    for layer in V_line_order:
+        remain_size_x = Size_x*1000
+        location = 0 
+        print("해당 metal line의 grade 뭐가 있는지 확인")
 
-                            Metal_count_limit[grade] 
+        grade =[]
+        metal_inform=[]
+        for pitch in Metal_pitch:
+            if layer in pitch :
+                grade.append(pitch)
 
+        while remain_size_x > location :
+            #현재 위치에 사용 가능 한 Line 확인 
+            order_list = Metal_grade_order[layer]
+            #order_list = [ start , end , [ metal_1st , metal_2nd ]]
+            for order in order_list :
+                    grade_list = order[2]
+
+                    while order[0]*1000 <= location and location < order[1]*1000 :
+                        for grade in grade_list :
+                            #metal_inform.ap               
+                            pre_grade = grade
+
+                            try :
+                                pre_grade = Valid_line_v[len(Valid_line_v)-1][1]
+                            except:
+                                print('첫번째 Valid_line_v')
+
+                            max_space = max( Metal_space[grade] , Metal_space[pre_grade])
+                            metal_center = int(location + max_space + Metal_width[grade]/2)
+                            location = int(location + max_space + Metal_width[grade])
+
+                            #print("Metal Count Limit Check 부분 추가 필요 ")
+                            new_line = [ layer, grade,[metal_center,0 ], [metal_center,Size_x*1000]]
+                            if Metal_count[grade] < Metal_count_limit[grade]:
+                                Valid_line_v.append(new_line)
+                                Metal_count[grade] = Metal_count[grade] + 1
+                                #print("pintch=",Valid_line_v[len(Valid_line_v)-1][1],Valid_line_v[len(Valid_line_v)-1][2][1] - Valid_line_v[len(Valid_line_v)-2][2][1])
 
 
 valid_metal_update()
@@ -220,7 +300,7 @@ def routing_option_v ( line_h, net ):
         if (max(net[2][1],net[3][1]) <= max((valid_v[2][1],valid_v[3][1]))) and ((min(net[2][1],net[3][1])>=min(valid_v[2][1],valid_v[3][1]))):
             new_distance = abs(net[2][0] - valid_v[2][0])
             #1차 후보: 해당 X 좌표에 수직 Line 있는지 확인. 
-            if ( new_distance ) == Metal_pitch[valid_v[0]] :
+            if ( new_distance ) == Metal_pitch[valid_v[1]] :
                 print("matching 되는 것이 있으면 기존의 option_v 는 모두 제거 한다. ")
                 print('contact  확인 필요.')
                 line_v = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
@@ -234,7 +314,7 @@ def routing_option_v ( line_h, net ):
             else :
                 if old_distance > new_distance:
                     old_distance = new_distance 
-                    if old_distance < Metal_pitch[valid_v[0]]*2:
+                    if old_distance < Metal_pitch[valid_v[1]]*2:
                         print("matching 되는 것이 있으면 기존의 option_v 는 모두 제거 한다. ")
                         print('contact  확인 필요.')
                         line_v = ["Opt1" , valid_v[0],valid_v[1],valid_v[2],valid_v[3]]
@@ -357,6 +437,13 @@ def routing_select_multi(net):
 
     print("Line 중 가장 긴 h 라인을 찾는다. ")
     long_h = [net[0],net[1],net[2],[min_x,min_y],[max_x,max_y]]
+    grade = "M2"
+    if "A_AC" in net[2] or "GIO" in net[2] or "CLK" in net[2] :
+        grade = "M2_A_AC"
+    elif "B_AC" in net[2] :
+        grade = "M2_B_AC"
+    elif "B_DC" in net[2] :
+        grade = "M2_B_DC"
     
     option_h_list = routing_option_h(long_h)
     print("option_h 중에서 가장 좋은건 어떤 것일까??")
@@ -392,7 +479,7 @@ def routing_select_multi(net):
         for i in range(len(net_x)):
             for metal in Metal_dir :
                 if Metal_dir[metal] == 'v':
-                    v_line = [ metal,net[2],[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
+                    v_line = [ metal,grade,[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
                     option_v = routing_option_v(option_h,v_line)
 
             if option_v !=[]:
@@ -449,8 +536,10 @@ def routing_select_multi(net):
         line_v_list=[]
 
         for i in range(len(net_x)):
-            v_line = [ 'M2',net[2],[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
-            option_v = routing_option_v(v_line)
+
+
+            v_line = [ 'M2',grade,[net_x[i],min(net_y[i],line_y)],[net_x[i],max(net_y[i],line_y)]]
+            option_v = routing_option_v(option_h,v_line)
 
             if option_v !=[]:
                 pass_flag = 1
@@ -464,7 +553,7 @@ def routing_select_multi(net):
                 option_v_list.clear()
                 line_v_list.clear()
         
-        #print("기존에 option_metal 과 비교를 하고 새로운 대안이 될지 확인 하자.")
+        #print("기존에 option_metal 과 비교를 하고 새로운 대안이 될지 확인 하자.")E
         #print("vertical line 길이 총합이 짧은 녀석이 좋은 놈이다. ")
         if pass_flag ==1 :
             for line in line_v_list:
@@ -603,9 +692,9 @@ def routing_line(net):
             
 
 
-net2=['net_1002','M3','A',[400,300],[1000,700],[10000,400]]
-net3=['net_1003','M3','A',[11000,300],[1000,700],[10000,400],[100,20000]]
-net4=['net_1004','M5','A',[11000,300],[1000,700],[10000,400],[100,20000]]
+net2=['net_1002','M3','M3_A_AC',[400,300],[1000,700],[10000,400]]
+net3=['net_1003','M3','M4_A_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
+net4=['net_1004','M5','M5_GIO_AC',[11000,300],[1000,700],[10000,400],[100,20000]]
 #net4=['net_1004','M5','A',[-11000,3000],[1000,7000],[10000,4000],[100,20000],[2000,100000]]
 
 start = time.time()
