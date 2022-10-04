@@ -708,13 +708,73 @@ def draw_line(used_line_list) :
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-draw_line(Used_line_h)
+#draw_line(Used_line_h)
 
-print(len(Valid_line_v))
-
-
+#print(len(Valid_line_v))
 
 
 
+def check_max_loading(used_line_h,used_line_v):
+    max_loading = {}
+    for line_h  in used_line_h:
+        net = line_h[0]
+        max_loading[net]=0
+
+    for line_h in used_line_h:
+        print(line_h)
+        net = line_h[0]
+        for net_l in max_loading :
+            max_loading[net] = max_loading[net] + abs(line_h[3][0] - line_h[4][0])
+
+    print(max_loading)
+    for line_v in used_line_v:
+        net = line_v[0]
+        for net_l in max_loading :
+            max_loading[net] = max_loading[net] + abs(line_v[3][1] - line_v[4][1])
+
+    print(max_loading)
+
+#check_max_loading(Used_line_h,Used_line_v)
+
+
+def count_max_line_h(used_line_h):
+    metal_grade = []
+    for line_h in used_line_h:
+        same = 0 
+        for grade in metal_grade :
+            if grade == line_h[2] :
+                same =1
+        if same == 0 :
+            metal_grade.append(line_h[2])
+
+    rows = len(metal_grade)
+    metal_count =[]
+
+    for i in range( rows ):
+        metal_count.append([])
+        for j in range(Size_x):
+            metal_count[i].append(0)
+    #metal_count = [[0]*Size_x] * rows
+    metal_count[0][0] =1
+
+    for line in  used_line_h :
+        for i in range(len(metal_grade)) :
+            if line[2] == metal_grade[i]:
+                for x in range(Size_x) :
+                    if min(line[3][0] , line[4][0]) <= x < max(line[3][0],line[4][0]):
+                        metal_count[i][x] = int(metal_count[i][x])+1
+    print(metal_grade[0],max(metal_count[0]))
+    print(metal_grade[1],max(metal_count[1]))
+    print(metal_grade[2],max(metal_count[2]))
+    print(metal_grade[3],max(metal_count[3]))
+
+    metal_count_return ={}
+    for i in range( len(metal_grade)):
+        metal_count_return[metal_grade[i]]=max(metal_count[i])
+    return metal_count_return
+
+metal_count = count_max_line_h(Used_line_h)
+
+print(metal_count)
 
 
